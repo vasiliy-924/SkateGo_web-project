@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: skatego_db
+      POSTGRES_USER: skatego_user
+      POSTGRES_PASSWORD: skatego_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: python skatego/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_NAME=skatego_db
+      - DB_USER=skatego_user
+      - DB_PASSWORD=skatego_pass
+      - DB_HOST=db
+      - DB_PORT=5432
+
+volumes:
+  postgres_data:
