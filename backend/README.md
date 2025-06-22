@@ -1,13 +1,21 @@
 # SkateGo - Платформа аренды электроскейтбордов
 
 ## Описание
-SkateGo - это веб-платформа для аренды электроскейтбордов. Пользователи могут находить, арендовать и возвращать электроскейтборды через веб-интерфейс.
+SkateGo — это веб-платформа для аренды электроскейтбордов. Пользователи могут находить, арендовать и возвращать электроскейтборды через веб-интерфейс.
 
 ## Технологии
-- **Backend:** Django 5.2+, Django REST Framework
-- **База данных:** PostgreSQL 15
+- **Backend:** Django >=5.2.1, Django REST Framework
+- **База данных:** PostgreSQL 17
 - **Контейнеризация:** Docker, Docker Compose
-- **Язык программирования:** Python 3.11
+- **Язык программирования:** Python 3.12
+- **Дополнительные зависимости:**
+  - psycopg2-binary>=2.9
+  - gevent==24.11.1
+  - gunicorn==23.0.0
+  - django-extensions
+  - django-debug-toolbar
+
+> **Примечание:** Все актуальные зависимости указаны в [backend/skatego/requirements.txt](skatego/requirements.txt) и Dockerfile.
 
 ## Структура проекта
 ```
@@ -17,12 +25,27 @@ backend/
 │   ├── users/              # Пользователи и аутентификация
 │   ├── reviews/            # Отзывы о электроскейтбордах
 │   ├── api/                # API endpoints
-│   └── skatego/            # Настройки проекта
+│   ├── skatego/            # Настройки проекта
+│   ├── Dockerfile          # Образ Docker
+│   ├── gunicorn.py         
+│   └── requirements.txt.   # Зависимости Python
 ├── docker-compose.yml      # Конфигурация Docker Compose
-├── Dockerfile              # Образ Docker
-├── requirements.txt        # Зависимости Python
-└── README.md              # Документация
+├── README.md               # Документация
 ```
+
+## Порты и сервисы
+
+| Сервис      | Внешний порт | Внутри контейнера | Назначение                                 |
+|-------------|--------------|-------------------|--------------------------------------------|
+| nginx       | 80           | 8088              | Основной веб-интерфейс (проксирует к Django)|
+| skato_go    | 8000         | 8000              | Django/gunicorn (API, админка)             |
+| adminer     | 8080         | 8080              | Веб-интерфейс для работы с БД              |
+| postgres    | —            | 5432              | Только внутри docker-сети                  |
+
+**Доступы по умолчанию:**
+- http://localhost:80 — основной веб-интерфейс (через nginx)
+- http://localhost:8000 — напрямую Django (API/админка)
+- http://localhost:8080 — Adminer (интерфейс для работы с БД)
 
 ## Быстрый старт
 
@@ -45,7 +68,7 @@ docker-compose up --build
 
 3. **Создание суперпользователя (опционально):**
 ```bash
-docker-compose exec web python skatego/manage.py createsuperuser
+docker compose exec skate_go python manage.py createsuperuser
 ```
 
 4. **Открытие приложения:**
@@ -66,7 +89,7 @@ venv\Scripts\activate     # Windows
 
 2. **Установка зависимостей:**
 ```bash
-pip install -r requirements.txt
+pip install -r skatego/requirements.txt
 ```
 
 3. **Настройка базы данных:**
@@ -87,54 +110,51 @@ python skatego/manage.py runserver
 ```
 
 ### Переменные окружения
-Создайте файл `.env` в корне проекта:
+Создайте файл `.env` в корне backend:
 ```env
 DEBUG=True
 SECRET_KEY=your-secret-key
-DB_NAME=skatego_db
-DB_USER=skatego_user
-DB_PASSWORD=skatego_pass
-DB_HOST=localhost
-DB_PORT=5432
+DATABASE_NAME=skatego_db
+DATABASE_USERNAME=skatego_user
+DATABASE_PASSWORD=skatego_pass
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
 ```
 
 ## Модели данных
 
-### SkateBoardModel (Модель электроскейтборда)
-- Название модели
-- Описание
-- Максимальная скорость (км/ч)
-- Емкость батареи (Ач)
-- Напряжение батареи (В)
-- Запас хода (км)
+### SkateboardModel (Модель электроскейтборда)
+- name (строка, до 100 символов)
+- description (текст)
+- max_speed_km_h (целое, 1–200)
+- battery_capacity_from_factory_ah (float, 0–120)
+- max_battery_voltage_v (float, 1–120)
+- min_battery_voltage_v (float, 0–120)
+- power_reverse_km (целое, 1–200)
 
-### SkateBoard (Электроскейтборд)
-- Модель (связь с SkateBoardModel)
-- Серийный номер
-- Исходная ёмкость (Wh)
-- Текущая макс. ёмкость (Wh)
-- Остаточная ёмкость (Wh)
-- Общий пробег (км)
-- Статус (доступен/арендован/на обслуживании/сломан)
+### Skateboard (Электроскейтборд)
+- model (ForeignKey на SkateboardModel)
+- serial_number (строка, до 50 символов, уникальный)
+- current_battery_capacity_ah (float, 0–120)
+- current_battery_voltage_v (float, 0–120)
+- total_distance_km (float, >=0)
+- status (доступен/арендован/на обслуживании/сломан)
 
 ### User (Пользователь)
-- Имя пользователя
-- Email
-- Имя и фамилия
-- Телефон
-- Тип пользователя (обычный/сотрудник/администратор)
+- username (строка, до 31 символа, уникальный)
+- kind (C — обычный, S — сотрудник, A — админ)
 
-### SkateBoardLocation (Местоположение)
-- Электроскейтборд
-- Координаты (широта/долгота)
-- Адрес
-- Временная метка
+### SkateboardLocation (Местоположение)
+- skateboard (ForeignKey на Skateboard)
+- location_lat (float, -90.0 до 90.0)
+- location_lng (float, -180.0 до 180.0)
+- location_last_update (datetime)
 
 ### SkateboardReview (Отзыв)
-- Пользователь
-- Электроскейтборд
-- Оценка (1.0-5.0)
-- Текст отзыва
+- user (ForeignKey на User)
+- skateboard (ForeignKey на Skateboard)
+- rating (float, 1.0–5.0)
+- text (текст)
 
 ## API Endpoints
 
@@ -158,10 +178,10 @@ docker-compose up -d
 docker-compose down
 
 # Просмотр логов
-docker-compose logs -f web
+docker-compose logs -f skato_go
 
 # Выполнение команд в контейнере
-docker-compose exec web python skatego/manage.py shell
+docker-compose exec skato_go python manage.py shell
 ```
 
 ### Django Management
