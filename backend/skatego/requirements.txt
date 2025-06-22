@@ -1,0 +1,9 @@
+Django>=5.2.1
+psycopg2-binary>=2.9
+
+gevent==24.11.1
+gunicorn==23.0.0
+
+django-extensions
+django-debug-toolbar
+djangorestframework

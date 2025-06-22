@@ -1,44 +1,70 @@
-version: '3.9'
-
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: skatego_db
-      POSTGRES_USER: skatego_user
-      POSTGRES_PASSWORD: skatego_pass
+  nginx:
+    image: nginx:latest
+    container_name: nginx-server
+    restart: always
+    networks:
+      - dbnet
+    expose:
+      - 8088
+    ports:
+      - '80:8088'
+    volumes:
+      - ./skatego/static:/app/www/skatego/static
+      - ./skatego/media:/app/www/skatego/media
+      - ./skatego/logs:/app/www/skatego/logs
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - skato_go
+
+
+  skato_go:
+    build: ./skatego
+    image: skatego
+    container_name: skatego
+    restart: always
+    command: 'gunicorn -c gunicorn.py skatego.wsgi'
+    env_file:
+      - .env
+    links:
+      - 'postgres:dbps'
+    networks:
+      - dbnet
+    volumes:
+      - ./skatego:/app/www/skatego
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgres
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - '8080:8080'
+    links:
+      - 'postgres:db'
+    networks:
+      - dbnet
+    depends_on:
+      - postgres
+
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: skate_postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U skatego_user -d skatego_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  web:
-    build: .
-    command: >
-      sh -c "python skatego/manage.py migrate &&
-             python skatego/manage.py collectstatic --noinput &&
-             python skatego/manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .:/code
-    ports:
-      - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
-      - DB_NAME=skatego_db
-      - DB_USER=skatego_user
-      - DB_PASSWORD=skatego_pass
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DEBUG=True
-      - SECRET_KEY=django-insecure-)iv7)t=p-ph%e=lwa-&8bw2(5)n=baj(hw**&q4t!%ssdfy-o#
-    restart: unless-stopped
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - dbnet
+
+networks:
+  dbnet:
+    driver: bridge
 
 volumes:
   postgres_data:

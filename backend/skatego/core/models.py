@@ -59,6 +59,7 @@ class Skateboard(models.Model):
         SkateboardModel,
         related_name='skateboards',
         on_delete=models.SET_NULL,
+        null=True,
         verbose_name='Модель')
     serial_number = models.CharField(
         max_length=50,
@@ -122,7 +123,9 @@ class SkateboardLocation(models.Model):
     skateboard = models.ForeignKey(
         Skateboard,
         related_name='location_history',
-        on_delete=models.SET_NULL)
+        on_delete=models.SET_NULL,
+        null=True
+    )
     location_lat = models.FloatField(
         validators=[
             MinValueValidator(-90.0),
