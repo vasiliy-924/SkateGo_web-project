@@ -1,0 +1,80 @@
+.ui-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.ui-card:hover {
+  transform: translateY(-2px);
+}
+
+.ui-card__header {
+  padding: var(--container-padding, 16px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.ui-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.ui-card__subheader {
+  margin: 4px 0 0;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.875rem;
+}
+
+.ui-card__content {
+  padding: var(--container-padding, 16px);
+}
+
+.ui-card__footer {
+  padding: var(--container-padding, 16px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ui-card__action {
+  position: absolute;
+  top: var(--container-padding, 16px);
+  right: var(--container-padding, 16px);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 767px) {
+  .ui-card {
+    border-radius: 8px;
+  }
+
+  .ui-card__header,
+  .ui-card__content,
+  .ui-card__footer {
+    padding: 12px;
+  }
+
+  .ui-card__title {
+    font-size: 1.125rem;
+  }
+}
+
+/* Card variants */
+.ui-card--elevated {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ui-card--outlined {
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .ui-card:hover {
+    transform: none;
+  }
+} 

@@ -17,8 +17,7 @@ const UserStats = () => {
 
   const fetchUserStats = async () => {
     try {
-      const response = await api.get('/user/stats/');
-      const data = response.data;
+      const data = await api.getUserStats();
       
       setStats({
         totalRentals: data.total_rentals,

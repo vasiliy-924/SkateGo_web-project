@@ -69,8 +69,24 @@ class MockApi {
     return this.mockRequest(rental);
   }
 
-  // Здесь будут добавляться другие методы для работы с разными сущностями
-  // например: пользователи, аренда, зоны и т.д.
+  // Метод для получения статистики пользователя
+  async getUserStats() {
+    // Подсчитываем статистику на основе истории аренды
+    const totalRentals = this.rentals.length;
+    const totalDurationHours = this.rentals.reduce((sum, rental) => sum + rental.duration, 0);
+    const avgDurationHours = totalDurationHours / totalRentals;
+    const totalDistance = this.rentals.reduce((sum, rental) => sum + rental.distance, 0);
+    const totalSpent = this.rentals.reduce((sum, rental) => sum + rental.cost, 0);
+    const totalPenalties = this.rentals.reduce((sum, rental) => sum + (rental.penalty || 0), 0);
+
+    return this.mockRequest({
+      total_rentals: totalRentals,
+      avg_duration_hours: avgDurationHours,
+      total_distance: totalDistance,
+      total_spent: totalSpent,
+      total_penalties: totalPenalties
+    });
+  }
 }
 
 // Создаем и экспортируем единственный экземпляр

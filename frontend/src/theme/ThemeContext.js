@@ -26,11 +26,23 @@ export const ThemeProvider = ({ children }) => {
   const [mode, setMode] = useState(initialMode);
   const [theme, setTheme] = useState(() => createTheme(initialMode === 'dark' ? darkTheme : lightTheme));
 
-  // Обновляем тему при изменении режима
+  // Применяем CSS-переменные
+  const applyCssVariables = (variables) => {
+    const root = document.documentElement;
+    Object.entries(variables).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    });
+  };
+
+  // Обновляем тему и CSS-переменные при изменении режима
   useEffect(() => {
     const newTheme = createTheme(mode === 'dark' ? darkTheme : lightTheme);
     setTheme(newTheme);
     localStorage.setItem('themeMode', mode);
+    
+    // Применяем CSS-переменные
+    const variables = mode === 'dark' ? darkTheme.cssVariables : lightTheme.cssVariables;
+    applyCssVariables(variables);
   }, [mode]);
 
   // Слушаем изменения системной темы
@@ -44,6 +56,12 @@ export const ThemeProvider = ({ children }) => {
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Применяем начальные CSS-переменные
+  useEffect(() => {
+    const variables = initialMode === 'dark' ? darkTheme.cssVariables : lightTheme.cssVariables;
+    applyCssVariables(variables);
   }, []);
 
   const toggleTheme = () => {

@@ -1,46 +1,44 @@
 import React from 'react';
-import { Button as MuiButton } from '@mui/material';
+import { motion } from 'framer-motion';
+import { buttonVariants } from '../../theme/animations';
+import './Button.css';
 import PropTypes from 'prop-types';
 
 const Button = ({ 
   children, 
-  variant = 'contained', 
+  variant = 'primary', 
   size = 'medium',
-  color = 'primary',
   fullWidth = false,
-  startIcon,
-  endIcon,
-  disabled = false,
-  onClick,
+  className = '',
   ...props 
 }) => {
+  const classes = [
+    'ui-button',
+    `ui-button--${variant}`,
+    `ui-button--${size}`,
+    fullWidth ? 'ui-button--full-width' : '',
+    className
+  ].filter(Boolean).join(' ');
+
   return (
-    <MuiButton
-      variant={variant}
-      size={size}
-      color={color}
-      fullWidth={fullWidth}
-      startIcon={startIcon}
-      endIcon={endIcon}
-      disabled={disabled}
-      onClick={onClick}
+    <motion.button 
+      className={classes}
+      variants={buttonVariants}
+      whileHover="hover"
+      whileTap="tap"
       {...props}
     >
       {children}
-    </MuiButton>
+    </motion.button>
   );
 };
 
 Button.propTypes = {
   children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf(['contained', 'outlined', 'text']),
+  variant: PropTypes.oneOf(['primary', 'secondary', 'success', 'error', 'warning', 'info']),
   size: PropTypes.oneOf(['small', 'medium', 'large']),
-  color: PropTypes.oneOf(['primary', 'secondary', 'success', 'error', 'warning', 'info']),
   fullWidth: PropTypes.bool,
-  startIcon: PropTypes.node,
-  endIcon: PropTypes.node,
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func,
+  className: PropTypes.string,
 };
 
 export default Button; 

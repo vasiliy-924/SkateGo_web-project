@@ -1,0 +1,80 @@
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  touch-action: manipulation;
+}
+
+.ui-button:active {
+  transform: scale(0.98);
+}
+
+/* Variants */
+.ui-button--primary {
+  background-color: var(--primary-color, #007bff);
+  color: white;
+}
+
+.ui-button--secondary {
+  background-color: var(--secondary-color, #6c757d);
+  color: white;
+}
+
+.ui-button--success {
+  background-color: var(--success-color, #28a745);
+  color: white;
+}
+
+.ui-button--error {
+  background-color: var(--error-color, #dc3545);
+  color: white;
+}
+
+/* Sizes */
+.ui-button--small {
+  font-size: 0.875rem;
+  padding: 6px 12px;
+}
+
+.ui-button--medium {
+  font-size: 1rem;
+  padding: 8px 16px;
+}
+
+.ui-button--large {
+  font-size: 1.125rem;
+  padding: 12px 24px;
+}
+
+/* Full width */
+.ui-button--full-width {
+  width: 100%;
+}
+
+/* Touch device optimizations */
+@media (hover: hover) {
+  .ui-button:hover {
+    opacity: 0.9;
+  }
+}
+
+/* Responsive padding adjustments */
+@media screen and (max-width: 767px) {
+  .ui-button {
+    padding: 12px 20px; /* Larger touch target on mobile */
+  }
+}
+
+/* Disabled state */
+.ui-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+} 

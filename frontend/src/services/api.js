@@ -27,6 +27,11 @@ class ApiService {
     return this.api.getRental(id);
   }
 
+  // Методы для работы с пользователем
+  async getUserStats() {
+    return this.api.getUserStats();
+  }
+
   // В будущем здесь будут добавляться другие методы для работы с API
 }
 

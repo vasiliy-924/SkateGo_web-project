@@ -1,18 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Slider,
-  Typography,
-  Paper
-} from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import SkateMap from '../components/SkateMap';
 import logger from '../services/logger';
+import { Card, Button, Skeleton } from '../components/UI';
+import { cardVariants, listItemVariants, filterVariants } from '../theme/animations';
+import './SkateListPage.css';
 
 // Моковые данные для тестирования
 const MOCK_SKATEBOARDS = [
@@ -53,6 +47,21 @@ const SkateListPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [batteryFilter, setBatteryFilter] = useState([0, 100]);
   const [loading, setLoading] = useState(true);
+  const [showMap, setShowMap] = useState(false);
+  const [selectedZone, setSelectedZone] = useState(null);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Доступен':
+        return 'success';
+      case 'Арендован':
+        return 'warning';
+      case 'На обслуживании':
+        return 'info';
+      default:
+        return 'error';
+    }
+  };
 
   const filterSkateboards = useCallback(() => {
     try {
@@ -123,7 +132,7 @@ const SkateListPage = () => {
   };
 
   const handleSkateSelect = (skate) => {
-    navigate(`/skateboards/${skate.id}`);
+    navigate(`/skates/${skate.id}`);
     logger.info('Выбран скейтборд', {
       skateId: skate.id,
       status: skate.status,
@@ -131,57 +140,159 @@ const SkateListPage = () => {
     });
   };
 
+  const renderSkeletons = () => (
+    Array(4).fill(0).map((_, index) => (
+      <Card key={`skeleton-${index}`}>
+        <div className="skateboard-card-skeleton">
+          <Skeleton height="200px" />
+          <Skeleton height="24px" width="60%" style={{ marginTop: '16px' }} />
+          <Skeleton height="20px" width="40%" style={{ marginTop: '8px' }} />
+          <Skeleton height="20px" width="30%" style={{ marginTop: '8px' }} />
+        </div>
+      </Card>
+    ))
+  );
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Доступные скейтборды
-      </Typography>
+    <div className="skatelist-page">
+      <motion.div 
+        className="hero-banner"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="hero-content">
+          <h1>Исследуй город на скейте</h1>
+          <p>Найди ближайший скейтборд и начни свое приключение</p>
+        </div>
+        <div className="hero-stats">
+          <div className="stat-item">
+            <span className="stat-number">{filteredSkateboards.length}</span>
+            <span className="stat-label">Доступно</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-number">4.8</span>
+            <span className="stat-label">Рейтинг</span>
+          </div>
+        </div>
+      </motion.div>
 
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Статус</InputLabel>
-            <Select
-              value={statusFilter}
-              onChange={handleStatusChange}
-              label="Статус"
-            >
-              <MenuItem value="all">Все</MenuItem>
-              <MenuItem value="Доступен">Доступен</MenuItem>
-              <MenuItem value="Арендован">Арендован</MenuItem>
-              <MenuItem value="На обслуживании">На обслуживании</MenuItem>
-              <MenuItem value="Сломан">Сломан</MenuItem>
-            </Select>
-          </FormControl>
+      <div className="bento-grid">
+        <motion.div 
+          className="filters-section"
+          variants={filterVariants}
+          initial="initial"
+          animate="animate"
+        >
+          <Card className="filter-card">
+            <h3>Фильтры</h3>
+            <div className="filter-content">
+              <div className="filter-group">
+                <label>Статус</label>
+                <select
+                  value={statusFilter}
+                  onChange={handleStatusChange}
+                  className="filter-select"
+                >
+                  <option value="all">Все статусы</option>
+                  <option value="Доступен">Доступен</option>
+                  <option value="Арендован">Арендован</option>
+                  <option value="На обслуживании">На обслуживании</option>
+                </select>
+              </div>
 
-          <Box sx={{ width: 300 }}>
-            <Typography gutterBottom>
-              Заряд батареи
-            </Typography>
-            <Slider
-              value={batteryFilter}
-              onChange={handleBatteryChange}
-              valueLabelDisplay="auto"
-              min={0}
-              max={100}
-            />
-          </Box>
-        </Box>
-      </Paper>
+              <div className="filter-group">
+                <label>Заряд батареи: {batteryFilter[0]}% - {batteryFilter[1]}%</label>
+                <div className="battery-slider">
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={batteryFilter[0]}
+                    onChange={(e) => handleBatteryChange(e, [parseInt(e.target.value), batteryFilter[1]])}
+                  />
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={batteryFilter[1]}
+                    onChange={(e) => handleBatteryChange(e, [batteryFilter[0], parseInt(e.target.value)])}
+                  />
+                </div>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
 
-      {loading ? (
-        <Typography>Загрузка...</Typography>
-      ) : (
-        <SkateMap 
-          skateboards={filteredSkateboards}
-          onSkateSelect={handleSkateSelect}
-        />
-      )}
+        <motion.div 
+          className="map-section"
+          variants={cardVariants}
+          initial="initial"
+          animate="animate"
+        >
+          <Card className="map-card">
+            <div className="map-header">
+              <h3>Карта скейтбордов</h3>
+              <Button
+                variant="secondary"
+                onClick={() => setShowMap(!showMap)}
+              >
+                {showMap ? 'Показать список' : 'Развернуть карту'}
+              </Button>
+            </div>
+            <div className={`map-container ${showMap ? 'expanded' : ''}`}>
+              <SkateMap 
+                skateboards={filteredSkateboards}
+                onSkateSelect={handleSkateSelect}
+                selectedZone={selectedZone}
+                onZoneSelect={setSelectedZone}
+              />
+            </div>
+          </Card>
+        </motion.div>
 
-      <Typography sx={{ mt: 2 }}>
-        Найдено скейтбордов: {filteredSkateboards.length}
-      </Typography>
-    </Box>
+        <AnimatePresence>
+          <motion.div 
+            className="skateboards-grid"
+            variants={listItemVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            {loading ? renderSkeletons() : (
+              filteredSkateboards.map((skate, index) => (
+                <motion.div
+                  key={skate.id}
+                  variants={cardVariants}
+                  custom={index}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => handleSkateSelect(skate)}
+                >
+                  <Card className="skateboard-card">
+                    <div className="skateboard-card__image">
+                      <div className="skateboard-preview" />
+                    </div>
+                    <div className="skateboard-card__content">
+                      <h3>{skate.name}</h3>
+                      <div className={`status-badge status-badge--${getStatusColor(skate.status)}`}>
+                        {skate.status}
+                      </div>
+                      <div className="battery-indicator">
+                        <div 
+                          className="battery-indicator__level"
+                          style={{ width: `${skate.battery_level}%` }}
+                        />
+                        <span>{skate.battery_level}%</span>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
   );
 };
 

@@ -2,6 +2,36 @@
 const primaryColor = process.env.REACT_APP_PRIMARY_COLOR || '#1a237e';
 const secondaryColor = process.env.REACT_APP_SECONDARY_COLOR || '#ff6f00';
 
+// CSS переменные для градиентов и цветов
+const cssVariables = {
+  light: {
+    '--bg-gradient-start': '#ffffff',
+    '--bg-gradient-end': '#f5f5f5',
+    '--text-gradient-start': '#1a237e',
+    '--text-gradient-end': '#534bae',
+    '--accent-gradient-start': '#1a237e',
+    '--accent-gradient-end': '#534bae',
+    '--text-primary': 'rgba(0, 0, 0, 0.87)',
+    '--text-secondary': 'rgba(0, 0, 0, 0.6)',
+    '--text-accent': '#1a237e',
+    '--text-on-accent': '#ffffff',
+    '--accent-color': '#1a237e',
+  },
+  dark: {
+    '--bg-gradient-start': '#121212',
+    '--bg-gradient-end': '#1e1e1e',
+    '--text-gradient-start': '#ffffff',
+    '--text-gradient-end': '#e0e0e0',
+    '--accent-gradient-start': '#534bae',
+    '--accent-gradient-end': '#1a237e',
+    '--text-primary': '#ffffff',
+    '--text-secondary': 'rgba(255, 255, 255, 0.7)',
+    '--text-accent': '#534bae',
+    '--text-on-accent': '#ffffff',
+    '--accent-color': '#534bae',
+  },
+};
+
 const commonTheme = {
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
@@ -62,6 +92,7 @@ const commonTheme = {
 
 export const lightTheme = {
   ...commonTheme,
+  cssVariables: cssVariables.light,
   palette: {
     mode: 'light',
     primary: {
@@ -137,6 +168,7 @@ export const lightTheme = {
 
 export const darkTheme = {
   ...commonTheme,
+  cssVariables: cssVariables.dark,
   palette: {
     mode: 'dark',
     primary: {

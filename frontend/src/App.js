@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { CssBaseline } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { ThemeProvider } from './theme/ThemeContext';
@@ -8,12 +8,21 @@ import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import NotFoundPage from './pages/NotFoundPage';
 import logger from './services/logger';
+import { AnimatePresence, motion } from 'framer-motion';
+import { pageVariants } from './theme/animations';
+import './App.css';
 
-// Ленивая загрузка компонентов
+// Import pages
+import SkateListPage from './pages/SkateListPage';
+import SkateDetailPage from './pages/SkateDetailPage';
+import ProfilePage from './pages/ProfilePage';
+
+// Lazy load admin components
 const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
-const SkateListPage = lazy(() => import('./pages/SkateListPage'));
-const SkateDetailPage = lazy(() => import('./pages/SkateDetailPage'));
+const ReportsPage = lazy(() => import('./pages/admin/ReportsPage'));
+const SkateboardsPage = lazy(() => import('./pages/admin/SkateboardsPage'));
+const UsersPage = lazy(() => import('./pages/admin/UsersPage'));
+const ZonesPage = lazy(() => import('./pages/admin/ZonesPage'));
 
 // Компонент загрузки
 const LoadingFallback = () => (
@@ -73,6 +82,26 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// Анимированный контейнер страницы
+const PageContainer = ({ children }) => {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="page-container"
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 function App() {
   useEffect(() => {
     // Логируем запуск приложения
@@ -110,17 +139,40 @@ function App() {
       <ThemeProvider>
         <CssBaseline />
         <Router>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/skateboards" element={<SkateListPage />} />
-              <Route path="/skateboards/:id" element={<SkateDetailPage />} />
-              <Route path="/admin/*" element={<AdminLayout />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
+          <div className="app">
+            <main className="main-content">
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<PageContainer><HomePage /></PageContainer>} />
+                <Route path="/skates" element={<PageContainer><SkateListPage /></PageContainer>} />
+                <Route path="/skates/:id" element={<PageContainer><SkateDetailPage /></PageContainer>} />
+                <Route path="/profile" element={<PageContainer><ProfilePage /></PageContainer>} />
+                <Route path="/auth" element={<PageContainer><AuthPage /></PageContainer>} />
+
+                {/* Admin routes with Suspense */}
+                <Route
+                  path="/admin/*"
+                  element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <PageContainer>
+                        <Routes>
+                          <Route element={<AdminLayout />}>
+                            <Route path="reports" element={<ReportsPage />} />
+                            <Route path="skateboards" element={<SkateboardsPage />} />
+                            <Route path="users" element={<UsersPage />} />
+                            <Route path="zones" element={<ZonesPage />} />
+                          </Route>
+                        </Routes>
+                      </PageContainer>
+                    </Suspense>
+                  }
+                />
+
+                {/* 404 route */}
+                <Route path="*" element={<PageContainer><NotFoundPage /></PageContainer>} />
+              </Routes>
+            </main>
+          </div>
           <ThemeToggle />
         </Router>
       </ThemeProvider>
