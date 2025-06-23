@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -15,13 +15,14 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
-import api from '../../services/api';
+import apiService from '../../services/api';
+import { SKATEBOARD_STATUSES } from '../../mocks/types';
 
 const statusColors = {
-  'Доступен': 'success',
-  'На обслуживании': 'warning',
-  'Сломан': 'error',
-  'Арендован': 'info'
+  [SKATEBOARD_STATUSES.AVAILABLE]: 'success',
+  [SKATEBOARD_STATUSES.MAINTENANCE]: 'warning',
+  [SKATEBOARD_STATUSES.BROKEN]: 'error',
+  [SKATEBOARD_STATUSES.RENTED]: 'info'
 };
 
 const SkateTable = ({ onEdit }) => {
@@ -31,28 +32,33 @@ const SkateTable = ({ onEdit }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    fetchSkateboards();
-  }, [page, rowsPerPage]);
-
-  const fetchSkateboards = async () => {
+  const fetchSkateboards = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/admin/skateboards/?page=${page + 1}&per_page=${rowsPerPage}`);
-      setSkateboards(response.data.results);
-      setTotal(response.data.total);
+      const response = await apiService.getSkateboards();
+      const startIndex = page * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
+      
+      // Для мока делаем пагинацию на клиенте
+      setSkateboards(response.slice(startIndex, endIndex));
+      setTotal(response.length);
     } catch (error) {
       console.error('Error fetching skateboards:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rowsPerPage]);
+
+  useEffect(() => {
+    fetchSkateboards();
+  }, [fetchSkateboards]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Вы уверены, что хотите удалить этот скейтборд?')) {
       try {
-        await api.delete(`/admin/skateboards/${id}/`);
-        fetchSkateboards();
+        // В будущем здесь будет вызов API для удаления
+        setSkateboards(prev => prev.filter(skate => skate.id !== id));
+        setTotal(prev => prev - 1);
       } catch (error) {
         console.error('Error deleting skateboard:', error);
       }
@@ -113,8 +119,8 @@ const SkateTable = ({ onEdit }) => {
                   />
                 </TableCell>
                 <TableCell>
-                  {skate.last_location ? (
-                    `${skate.last_location.lat.toFixed(6)}, ${skate.last_location.lng.toFixed(6)}`
+                  {skate.location ? (
+                    `${skate.location.lat.toFixed(6)}, ${skate.location.lng.toFixed(6)}`
                   ) : (
                     'Нет данных'
                   )}

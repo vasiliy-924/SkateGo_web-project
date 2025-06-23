@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import React, { useState, useEffect, useCallback } from 'react';
+import apiService from '../services/api';
 
 const RentalHistory = () => {
   const [history, setHistory] = useState([]);
@@ -7,25 +7,30 @@ const RentalHistory = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    fetchHistory();
-  }, [page]);
-
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
-      const response = await api.get(`/rentals/history/?page=${page}`);
-      const newHistory = response.data.results;
-      
-      setHistory(prev => page === 1 ? newHistory : [...prev, ...newHistory]);
-      setHasMore(response.data.next !== null);
-      setLoading(false);
+      setLoading(true);
+      const response = await apiService.getRentalHistory(page);
+      if (page === 1) {
+        setHistory(response.results);
+      } else {
+        setHistory(prev => [...prev, ...response.results]);
+      }
+      setHasMore(response.next !== null);
     } catch (error) {
       console.error('Error fetching rental history:', error);
+    } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   const calculateDuration = (start, end) => {
+    if (!end) return 'В процессе';
+    
     const startTime = new Date(start);
     const endTime = new Date(end);
     const diff = (endTime - startTime) / 1000 / 60; // в минутах
@@ -50,7 +55,7 @@ const RentalHistory = () => {
                 <div className="history-header">
                   <h3>Скейтборд #{rental.skateboard_id}</h3>
                   <span className={`status ${rental.status.toLowerCase()}`}>
-                    {rental.status}
+                    {rental.status === 'active' ? 'Активная' : 'Завершена'}
                   </span>
                 </div>
 
@@ -59,18 +64,22 @@ const RentalHistory = () => {
                     <span>Начало:</span>
                     <span>{new Date(rental.start_time).toLocaleString()}</span>
                   </div>
-                  <div className="detail-row">
-                    <span>Окончание:</span>
-                    <span>{new Date(rental.end_time).toLocaleString()}</span>
-                  </div>
+                  {rental.end_time && (
+                    <div className="detail-row">
+                      <span>Окончание:</span>
+                      <span>{new Date(rental.end_time).toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="detail-row">
                     <span>Длительность:</span>
                     <span>{calculateDuration(rental.start_time, rental.end_time)}</span>
                   </div>
-                  <div className="detail-row">
-                    <span>Стоимость:</span>
-                    <span className="price">{rental.total_price}₽</span>
-                  </div>
+                  {rental.total_cost !== null && (
+                    <div className="detail-row">
+                      <span>Стоимость:</span>
+                      <span className="price">{rental.total_cost}₽</span>
+                    </div>
+                  )}
                   
                   {rental.penalty_amount > 0 && (
                     <div className="penalty-info">

@@ -6,6 +6,7 @@ import SkateboardsPage from '../pages/admin/SkateboardsPage';
 import UsersPage from '../pages/admin/UsersPage';
 import ZonesPage from '../pages/admin/ZonesPage';
 import ReportsPage from '../pages/admin/ReportsPage';
+import LogViewer from '../components/admin/LogViewer';
 
 const AdminLayout = () => {
   return (
@@ -26,6 +27,7 @@ const AdminLayout = () => {
           <Route path="users" element={<UsersPage />} />
           <Route path="zones" element={<ZonesPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="logs" element={<LogViewer />} />
         </Routes>
       </Box>
     </Box>

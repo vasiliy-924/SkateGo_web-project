@@ -7,7 +7,11 @@ import {
   ListItemIcon, 
   ListItemText,
   Typography,
-  Divider
+  Divider,
+  AppBar,
+  Toolbar,
+  Button,
+  Box
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -15,7 +19,8 @@ import {
   People as UsersIcon,
   Room as ZonesIcon,
   Assessment as ReportsIcon,
-  ExitToApp as LogoutIcon
+  ExitToApp as LogoutIcon,
+  BugReport as LogsIcon
 } from '@mui/icons-material';
 
 const menuItems = [
@@ -23,7 +28,8 @@ const menuItems = [
   { path: '/admin/skateboards', icon: <SkateboardIcon />, text: 'Скейтборды' },
   { path: '/admin/users', icon: <UsersIcon />, text: 'Пользователи' },
   { path: '/admin/zones', icon: <ZonesIcon />, text: 'Зоны' },
-  { path: '/admin/reports', icon: <ReportsIcon />, text: 'Отчеты' }
+  { path: '/admin/reports', icon: <ReportsIcon />, text: 'Отчеты' },
+  { path: '/admin/logs', icon: <LogsIcon />, text: 'Логи' }
 ];
 
 const AdminNav = () => {
@@ -81,7 +87,6 @@ const AdminNav = () => {
       <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.12)', mt: 'auto' }} />
       <List>
         <ListItem
-          button
           component={Link}
           to="/logout"
           sx={{
