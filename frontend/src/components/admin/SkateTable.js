@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -6,64 +6,47 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TablePagination,
+  Paper,
   IconButton,
   Chip,
-  LinearProgress
+  LinearProgress,
+  Tooltip,
+  TablePagination,
+  Box,
+  Typography
 } from '@mui/material';
 import {
   Edit as EditIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  BatteryChargingFull as BatteryIcon,
+  Speed as SpeedIcon,
+  ElectricBolt as VoltageIcon,
+  Route as RouteIcon
 } from '@mui/icons-material';
-import apiService from '../../services/api';
-import { SKATEBOARD_STATUSES } from '../../mocks/types';
+import { SKATEBOARD_STATUSES, TECHNICAL_PARAMS } from '../../mocks/types';
 
 const statusColors = {
   [SKATEBOARD_STATUSES.AVAILABLE]: 'success',
-  [SKATEBOARD_STATUSES.MAINTENANCE]: 'warning',
+  [SKATEBOARD_STATUSES.RENTED]: 'warning',
+  [SKATEBOARD_STATUSES.MAINTENANCE]: 'info',
+  [SKATEBOARD_STATUSES.CHARGING]: 'info',
   [SKATEBOARD_STATUSES.BROKEN]: 'error',
-  [SKATEBOARD_STATUSES.RENTED]: 'info'
+  [SKATEBOARD_STATUSES.OFFLINE]: 'default'
 };
 
-const SkateTable = ({ onEdit }) => {
-  const [skateboards, setSkateboards] = useState([]);
-  const [loading, setLoading] = useState(true);
+const getBatteryHealthColor = (health) => {
+  if (health >= 90) return 'success';
+  if (health >= TECHNICAL_PARAMS.CRITICAL_HEALTH) return 'warning';
+  return 'error';
+};
+
+const formatBatteryPercentage = (current, max) => {
+  return Math.round((current / max) * 100);
+};
+
+const SkateTable = ({ skateboards, onEdit, onDelete }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [total, setTotal] = useState(0);
-
-  const fetchSkateboards = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await apiService.getSkateboards();
-      const startIndex = page * rowsPerPage;
-      const endIndex = startIndex + rowsPerPage;
-      
-      // Для мока делаем пагинацию на клиенте
-      setSkateboards(response.slice(startIndex, endIndex));
-      setTotal(response.length);
-    } catch (error) {
-      console.error('Error fetching skateboards:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, rowsPerPage]);
-
-  useEffect(() => {
-    fetchSkateboards();
-  }, [fetchSkateboards]);
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Вы уверены, что хотите удалить этот скейтборд?')) {
-      try {
-        // В будущем здесь будет вызов API для удаления
-        setSkateboards(prev => prev.filter(skate => skate.id !== id));
-        setTotal(prev => prev - 1);
-      } catch (error) {
-        console.error('Error deleting skateboard:', error);
-      }
-    }
-  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -75,87 +58,146 @@ const SkateTable = ({ onEdit }) => {
   };
 
   return (
-    <>
-      {loading && <LinearProgress />}
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer>
-        <Table>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>Модель</TableCell>
-              <TableCell>Заряд</TableCell>
+              <TableCell>Серийный номер</TableCell>
               <TableCell>Статус</TableCell>
-              <TableCell>Последняя локация</TableCell>
+              <TableCell>Батарея</TableCell>
+              <TableCell>Характеристики</TableCell>
+              <TableCell>Местоположение</TableCell>
               <TableCell>Действия</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {skateboards.map((skate) => (
-              <TableRow key={skate.id}>
-                <TableCell>{skate.id}</TableCell>
-                <TableCell>{skate.model}</TableCell>
-                <TableCell>
-                  <LinearProgress
-                    variant="determinate"
-                    value={skate.battery_level}
-                    sx={{
-                      height: 10,
-                      borderRadius: 5,
-                      backgroundColor: '#e0e0e0',
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: skate.battery_level < 20 ? '#f44336' : '#4caf50'
-                      }
-                    }}
-                  />
-                  <div style={{ textAlign: 'center', fontSize: '0.75rem' }}>
-                    {skate.battery_level}%
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={skate.status}
-                    color={statusColors[skate.status]}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  {skate.location ? (
-                    `${skate.location.lat.toFixed(6)}, ${skate.location.lng.toFixed(6)}`
-                  ) : (
-                    'Нет данных'
-                  )}
-                </TableCell>
-                <TableCell>
-                  <IconButton
-                    size="small"
-                    onClick={() => onEdit(skate)}
-                    color="primary"
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleDelete(skate.id)}
-                    color="error"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {skateboards
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((skate) => {
+                const batteryPercentage = formatBatteryPercentage(
+                  skate.current_battery_capacity_ah,
+                  skate.model.battery_capacity_from_factory_ah
+                );
+
+                return (
+                  <TableRow key={skate.id}>
+                    <TableCell>{skate.id}</TableCell>
+                    <TableCell>
+                      <Box>
+                        <Typography variant="subtitle2">{skate.model.name}</Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          {skate.model.description}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>{skate.serial_number}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={skate.status}
+                        color={statusColors[skate.status]}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ width: '100%', mb: 1 }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={batteryPercentage}
+                          sx={{
+                            height: 10,
+                            borderRadius: 5,
+                            backgroundColor: '#e0e0e0',
+                            '& .MuiLinearProgress-bar': {
+                              backgroundColor: batteryPercentage < 20 ? '#f44336' : '#4caf50'
+                            }
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Tooltip title="Заряд">
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <BatteryIcon fontSize="small" />
+                            <Typography variant="caption">
+                              {batteryPercentage}%
+                            </Typography>
+                          </Box>
+                        </Tooltip>
+                        <Tooltip title="Здоровье батареи">
+                          <Chip
+                            label={`${skate.battery_health}%`}
+                            color={getBatteryHealthColor(skate.battery_health)}
+                            size="small"
+                          />
+                        </Tooltip>
+                      </Box>
+                      <Box sx={{ mt: 1 }}>
+                        <Tooltip title="Напряжение">
+                          <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <VoltageIcon fontSize="small" />
+                            {skate.current_battery_voltage_v}В
+                          </Typography>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box>
+                        <Tooltip title="Максимальная скорость">
+                          <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <SpeedIcon fontSize="small" />
+                            {skate.model.max_speed} км/ч
+                          </Typography>
+                        </Tooltip>
+                        <Tooltip title="Общий пробег">
+                          <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <RouteIcon fontSize="small" />
+                            {skate.total_distance.toFixed(1)} км
+                          </Typography>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption">
+                        {skate.location.address}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary" display="block">
+                        {new Date(skate.location.timestamp).toLocaleString()}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <IconButton
+                        size="small"
+                        onClick={() => onEdit(skate)}
+                        color="primary"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => onDelete(skate.id)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={total}
+        count={skateboards.length}
+        rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25, 50]}
       />
-    </>
+    </Paper>
   );
 };
 

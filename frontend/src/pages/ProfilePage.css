@@ -2,6 +2,7 @@
   max-width: 1440px;
   margin: 0 auto;
   padding: 2rem;
+  color: var(--text-primary);
 }
 
 /* Profile Header */
@@ -9,7 +10,6 @@
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
   border-radius: 24px;
   padding: 3rem 2rem;
-  color: white;
   margin-bottom: 2rem;
   position: relative;
   overflow: hidden;
@@ -82,18 +82,21 @@
   font-size: 2.5rem;
   font-weight: 800;
   margin: 0 0 0.5rem 0;
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .user-email {
   font-size: 1.1rem;
   opacity: 0.9;
   margin: 0 0 0.5rem 0;
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .join-date {
   font-size: 0.9rem;
   opacity: 0.7;
   margin: 0;
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .edit-profile-btn {
@@ -106,10 +109,14 @@
 /* Main Stats */
 .main-stats {
   margin-bottom: 2rem;
+  color: var(--text-primary);
 }
 
 .stats-card {
   padding: 2rem;
+  background: var(--glass-bg-light);
+  border: 1px solid var(--glass-border-light);
+  border-radius: var(--border-radius-large);
 }
 
 .stats-grid {
@@ -128,7 +135,7 @@
 .stat-value {
   font-size: 2.5rem;
   font-weight: bold;
-  color: var(--primary-color);
+  color: var(--text-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,9 +156,10 @@
 
 /* Tabs */
 .profile-tabs {
-  background: var(--card-bg);
+  background: var(--glass-bg-light);
   border-radius: 16px;
   overflow: hidden;
+  border: 1px solid var(--glass-border-light);
 }
 
 .tabs-header {
@@ -164,20 +172,36 @@
   flex: 1;
   padding: 1rem;
   border: none;
-  background: var(--card-bg);
-  color: var(--text-secondary);
+  background: var(--glass-bg-light);
+  color: var(--text-primary);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .tab-button.active {
-  background: var(--primary-color);
-  color: white;
+  background: var(--accent-color);
+  color: var(--text-on-accent);
 }
 
 .tab-button:hover:not(.active) {
-  background: var(--bg-secondary);
+  background: var(--glass-bg-hover);
+}
+
+/* Dark theme overrides */
+[data-theme='dark'] .stats-card,
+[data-theme='dark'] .profile-tabs {
+  background: var(--glass-bg-dark);
+  border-color: var(--glass-border-dark);
+}
+
+[data-theme='dark'] .tab-button {
+  background: var(--glass-bg-dark);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .tab-button:hover:not(.active) {
+  background: var(--glass-bg-hover);
 }
 
 .tab-content {
@@ -313,4 +337,11 @@
   .achievements-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Dark theme overrides - сохраняем черный цвет даже в темной теме */
+[data-theme='dark'] .user-details h1,
+[data-theme='dark'] .user-email,
+[data-theme='dark'] .join-date {
+  color: rgba(0, 0, 0, 0.87);
 } 

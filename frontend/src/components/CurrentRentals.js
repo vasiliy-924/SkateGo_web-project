@@ -13,7 +13,7 @@ const CurrentRentals = () => {
 
   const fetchCurrentRentals = async () => {
     try {
-      const response = await api.get('/rentals/current/');
+      const response = await api.getCurrentRentals();
       setRentals(response.data);
       
       // Инициализация таймеров

@@ -19,6 +19,10 @@ class ApiService {
   }
 
   // Методы для работы с арендой
+  async getCurrentRentals() {
+    return this.api.getCurrentRentals();
+  }
+
   async getRentalHistory(page = 1) {
     return this.api.getRentalHistory(page);
   }

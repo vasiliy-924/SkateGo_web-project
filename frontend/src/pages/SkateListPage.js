@@ -6,58 +6,33 @@ import SkateMap from '../components/SkateMap';
 import logger from '../services/logger';
 import { Card, Button, Skeleton } from '../components/UI';
 import { cardVariants, listItemVariants, filterVariants } from '../theme/animations';
+import { SKATEBOARD_STATUSES } from '../mocks/types';
 import './SkateListPage.css';
-
-// Моковые данные для тестирования
-const MOCK_SKATEBOARDS = [
-  {
-    id: 1,
-    name: "Скейт #1",
-    status: "Доступен",
-    battery_level: 100,
-    location: { lat: 55.7558, lng: 37.6173 }, // Москва
-  },
-  {
-    id: 2,
-    name: "Скейт #2",
-    status: "Арендован",
-    battery_level: 75,
-    location: { lat: 55.7587, lng: 37.6200 },
-  },
-  {
-    id: 3,
-    name: "Скейт #3",
-    status: "На обслуживании",
-    battery_level: 30,
-    location: { lat: 55.7527, lng: 37.6222 },
-  },
-  {
-    id: 4,
-    name: "Скейт #4",
-    status: "Доступен",
-    battery_level: 90,
-    location: { lat: 55.7539, lng: 37.6150 },
-  },
-];
 
 const SkateListPage = () => {
   const navigate = useNavigate();
   const [skateboards, setSkateboards] = useState([]);
   const [filteredSkateboards, setFilteredSkateboards] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [batteryFilter, setBatteryFilter] = useState([0, 100]);
+  const [maxBatteryLevel, setMaxBatteryLevel] = useState(100);
   const [loading, setLoading] = useState(true);
   const [showMap, setShowMap] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Доступен':
+      case SKATEBOARD_STATUSES.AVAILABLE:
         return 'success';
-      case 'Арендован':
+      case SKATEBOARD_STATUSES.RENTED:
         return 'warning';
-      case 'На обслуживании':
+      case SKATEBOARD_STATUSES.MAINTENANCE:
         return 'info';
+      case SKATEBOARD_STATUSES.CHARGING:
+        return 'warning';
+      case SKATEBOARD_STATUSES.RESERVED:
+        return 'info';
+      case SKATEBOARD_STATUSES.OFFLINE:
+        return 'error';
       default:
         return 'error';
     }
@@ -71,10 +46,7 @@ const SkateListPage = () => {
         filtered = filtered.filter(skate => skate.status === statusFilter);
       }
 
-      filtered = filtered.filter(skate => 
-        skate.battery_level >= batteryFilter[0] && 
-        skate.battery_level <= batteryFilter[1]
-      );
+      filtered = filtered.filter(skate => skate.battery_level <= maxBatteryLevel);
 
       setFilteredSkateboards(filtered);
       
@@ -83,23 +55,21 @@ const SkateListPage = () => {
         filteredCount: filtered.length,
         filters: {
           status: statusFilter,
-          batteryRange: batteryFilter
+          maxBatteryLevel
         }
       });
     } catch (error) {
       logger.error('Ошибка при фильтрации скейтбордов', error);
     }
-  }, [skateboards, statusFilter, batteryFilter]);
+  }, [skateboards, statusFilter, maxBatteryLevel]);
 
   const fetchSkateboards = async () => {
     try {
       setLoading(true);
-      // Временно используем моковые данные вместо API
-      // const response = await api.get('/skateboards/');
-      // setSkateboards(response.data);
-      setSkateboards(MOCK_SKATEBOARDS);
+      const response = await api.getSkateboards();
+      setSkateboards(response);
       logger.info('Скейтборды успешно загружены', {
-        count: MOCK_SKATEBOARDS.length
+        count: response.length
       });
     } catch (error) {
       logger.error('Ошибка при загрузке скейтбордов', error);
@@ -115,7 +85,7 @@ const SkateListPage = () => {
 
   useEffect(() => {
     filterSkateboards();
-  }, [statusFilter, batteryFilter, skateboards, filterSkateboards]);
+  }, [statusFilter, maxBatteryLevel, skateboards, filterSkateboards]);
 
   const handleStatusChange = (event) => {
     setStatusFilter(event.target.value);
@@ -124,10 +94,10 @@ const SkateListPage = () => {
     });
   };
 
-  const handleBatteryChange = (event, newValue) => {
-    setBatteryFilter(newValue);
-    logger.debug('Изменен фильтр заряда батареи', {
-      newValue
+  const handleBatteryChange = (event) => {
+    setMaxBatteryLevel(parseInt(event.target.value));
+    logger.debug('Изменен максимальный уровень заряда', {
+      newValue: parseInt(event.target.value)
     });
   };
 
@@ -195,28 +165,25 @@ const SkateListPage = () => {
                   className="filter-select"
                 >
                   <option value="all">Все статусы</option>
-                  <option value="Доступен">Доступен</option>
-                  <option value="Арендован">Арендован</option>
-                  <option value="На обслуживании">На обслуживании</option>
+                  <option value={SKATEBOARD_STATUSES.AVAILABLE}>Доступен</option>
+                  <option value={SKATEBOARD_STATUSES.RENTED}>Арендован</option>
+                  <option value={SKATEBOARD_STATUSES.MAINTENANCE}>На обслуживании</option>
+                  <option value={SKATEBOARD_STATUSES.CHARGING}>На зарядке</option>
+                  <option value={SKATEBOARD_STATUSES.RESERVED}>Зарезервирован</option>
+                  <option value={SKATEBOARD_STATUSES.OFFLINE}>Не доступен</option>
                 </select>
               </div>
 
               <div className="filter-group">
-                <label>Заряд батареи: {batteryFilter[0]}% - {batteryFilter[1]}%</label>
+                <label>Показать с зарядом до: {maxBatteryLevel}%</label>
                 <div className="battery-slider">
                   <input
                     type="range"
                     min={0}
                     max={100}
-                    value={batteryFilter[0]}
-                    onChange={(e) => handleBatteryChange(e, [parseInt(e.target.value), batteryFilter[1]])}
-                  />
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={batteryFilter[1]}
-                    onChange={(e) => handleBatteryChange(e, [batteryFilter[0], parseInt(e.target.value)])}
+                    value={maxBatteryLevel}
+                    onChange={handleBatteryChange}
+                    className="battery-range-input"
                   />
                 </div>
               </div>
@@ -270,7 +237,15 @@ const SkateListPage = () => {
                 >
                   <Card className="skateboard-card">
                     <div className="skateboard-card__image">
-                      <div className="skateboard-preview" />
+                      <img 
+                        src={skate.image_url} 
+                        alt={skate.name}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.style.display = 'none';
+                          e.target.parentElement.classList.add('no-image');
+                        }}
+                      />
                     </div>
                     <div className="skateboard-card__content">
                       <h3>{skate.name}</h3>
@@ -283,6 +258,20 @@ const SkateListPage = () => {
                           style={{ width: `${skate.battery_level}%` }}
                         />
                         <span>{skate.battery_level}%</span>
+                      </div>
+                      <div className="skateboard-card__specs">
+                        <div className="spec-item">
+                          <span className="spec-label">Макс. скорость:</span>
+                          <span className="spec-value">{skate.specs.max_speed} км/ч</span>
+                        </div>
+                        <div className="spec-item">
+                          <span className="spec-label">Запас хода:</span>
+                          <span className="spec-value">{skate.specs.max_range} км</span>
+                        </div>
+                      </div>
+                      <div className="skateboard-card__price">
+                        <span>{skate.price_per_hour}₽/час</span>
+                        <span className="price-minute">({skate.price_per_minute}₽/мин)</span>
                       </div>
                     </div>
                   </Card>

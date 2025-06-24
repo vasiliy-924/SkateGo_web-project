@@ -52,7 +52,9 @@ class Skateboard(models.Model):
         ('available', 'Доступен'),
         ('rented', 'Арендован'),
         ('maintenance', 'На обслуживании'),
+        ('charging', 'На зарядке'),
         ('broken', 'Сломан'),
+        ('offline', 'Недоступен')
     )
     
     model = models.ForeignKey(

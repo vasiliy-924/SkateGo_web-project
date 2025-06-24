@@ -8,9 +8,6 @@ import {
   ListItemText,
   Typography,
   Divider,
-  AppBar,
-  Toolbar,
-  Button,
   Box
 } from '@mui/material';
 import {
@@ -19,12 +16,11 @@ import {
   People as UsersIcon,
   Room as ZonesIcon,
   Assessment as ReportsIcon,
-  ExitToApp as LogoutIcon,
-  BugReport as LogsIcon
+  BugReport as LogsIcon,
+  ExitToApp as LogoutIcon
 } from '@mui/icons-material';
 
 const menuItems = [
-  { path: '/admin', icon: <DashboardIcon />, text: 'Дашборд' },
   { path: '/admin/skateboards', icon: <SkateboardIcon />, text: 'Скейтборды' },
   { path: '/admin/users', icon: <UsersIcon />, text: 'Пользователи' },
   { path: '/admin/zones', icon: <ZonesIcon />, text: 'Зоны' },
@@ -45,15 +41,16 @@ const AdminNav = () => {
           width: 240,
           boxSizing: 'border-box',
           backgroundColor: '#1a237e',
-          color: 'white'
+          color: 'white',
+          position: 'fixed'
         }
       }}
     >
-      <div style={{ padding: '20px' }}>
-        <Typography variant="h6" component="div" sx={{ color: 'white' }}>
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" component={Link} to="/admin" sx={{ color: 'white', textDecoration: 'none' }}>
           SkateGo Admin
         </Typography>
-      </div>
+      </Box>
       <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.12)' }} />
       
       <List>
@@ -73,10 +70,11 @@ const AdminNav = () => {
               '&:hover': {
                 backgroundColor: 'rgba(255,255,255,0.04)'
               },
-              color: 'white'
+              color: 'white',
+              textDecoration: 'none'
             }}
           >
-            <ListItemIcon sx={{ color: 'white' }}>
+            <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.text} />
@@ -84,24 +82,27 @@ const AdminNav = () => {
         ))}
       </List>
       
-      <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.12)', mt: 'auto' }} />
-      <List>
-        <ListItem
-          component={Link}
-          to="/logout"
-          sx={{
-            color: 'white',
-            '&:hover': {
-              backgroundColor: 'rgba(255,255,255,0.04)'
-            }
-          }}
-        >
-          <ListItemIcon sx={{ color: 'white' }}>
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText primary="Выход" />
-        </ListItem>
-      </List>
+      <Box sx={{ mt: 'auto' }}>
+        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.12)' }} />
+        <List>
+          <ListItem
+            component={Link}
+            to="/auth"
+            sx={{
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.04)'
+              },
+              textDecoration: 'none'
+            }}
+          >
+            <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Выход" />
+          </ListItem>
+        </List>
+      </Box>
     </Drawer>
   );
 };

@@ -1,35 +1,55 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { buttonVariants } from '../../theme/animations';
+import { useTheme } from '../../theme/ThemeContext';
 import './Button.css';
 import PropTypes from 'prop-types';
 
 const Button = ({ 
   children, 
-  variant = 'primary', 
-  size = 'medium',
-  fullWidth = false,
-  className = '',
+  className = '', 
+  variant = 'neumorphic', // 'neumorphic', 'glass', 'text'
+  size = 'medium', // 'small', 'medium', 'large'
+  disabled = false,
+  onClick,
+  type = 'button',
   ...props 
 }) => {
-  const classes = [
-    'ui-button',
-    `ui-button--${variant}`,
-    `ui-button--${size}`,
-    fullWidth ? 'ui-button--full-width' : '',
-    className
-  ].filter(Boolean).join(' ');
+  const { mode } = useTheme();
+  const isDark = mode === 'dark';
+
+  const getVariantClass = () => {
+    switch (variant) {
+      case 'glass':
+        return isDark ? 'glass-dark' : 'glass-light';
+      case 'text':
+        return 'btn-text';
+      case 'neumorphic':
+      default:
+        return isDark ? 'neumorphism-dark' : 'neumorphism-light';
+    }
+  };
+
+  const getSizeClass = () => {
+    switch (size) {
+      case 'small':
+        return 'btn-small';
+      case 'large':
+        return 'btn-large';
+      case 'medium':
+      default:
+        return 'btn-medium';
+    }
+  };
 
   return (
-    <motion.button 
-      className={classes}
-      variants={buttonVariants}
-      whileHover="hover"
-      whileTap="tap"
+    <button
+      type={type}
+      className={`btn ${getVariantClass()} ${getSizeClass()} ${className} ${disabled ? 'disabled' : ''}`}
+      onClick={!disabled ? onClick : undefined}
+      disabled={disabled}
       {...props}
     >
       {children}
-    </motion.button>
+    </button>
   );
 };
 

@@ -3,35 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, Button, Badge } from '../components/UI';
 import { cardVariants } from '../theme/animations';
+import { TECHNICAL_PARAMS, TARIFFS } from '../mocks/types';
 import './SkateDetailPage.css';
-
-// Временные моковые данные
-const MOCK_SKATEBOARD = {
-  id: 2,
-  name: "Электроскейт Pro X2",
-  status: "Доступен",
-  battery_level: 85,
-  location: { lat: 55.7587, lng: 37.6200 },
-  specs: {
-    maxSpeed: "25 км/ч",
-    range: "20 км",
-    motor: "500W",
-    weight: "7 кг",
-    maxLoad: "100 кг",
-    chargingTime: "2 часа"
-  },
-  rating: 4.8,
-  reviews: 124,
-  pricePerHour: 299,
-  description: "Профессиональный электрический скейтборд с мощным мотором и длительным временем работы. Идеально подходит для городского передвижения и активного отдыха.",
-  features: [
-    "Влагозащита IP54",
-    "LED подсветка",
-    "Bluetooth подключение",
-    "Регенеративное торможение",
-    "Сменная батарея"
-  ]
-};
 
 const SkateDetailPage = () => {
   const { id } = useParams();
@@ -43,27 +16,66 @@ const SkateDetailPage = () => {
   useEffect(() => {
     // В будущем здесь будет API запрос
     setTimeout(() => {
-      setSkateboard(MOCK_SKATEBOARD);
+      setSkateboard({
+        id: 2,
+        model_id: 1,
+        serial_number: "BTX-2023-001",
+        name: "Электроскейт Pro X2",
+        status: "available",
+        current_battery_capacity_ah: 10.5,
+        current_battery_voltage_v: 36.5,
+        battery_health: 85,
+        total_distance: 1250.5,
+        location: { 
+          lat: 55.7587, 
+          lng: 37.6200,
+          address: "ул. Тверская, 15",
+          timestamp: "2024-03-20T14:30:00Z"
+        },
+        model: {
+          name: "Pro X2",
+          description: "Профессиональный электрический скейтборд с мощным мотором",
+          max_speed: 45,
+          battery_capacity_from_factory_ah: 12.0,
+          max_battery_voltage_v: 42.0,
+          min_battery_voltage_v: 33.0,
+          max_range: 35
+        },
+        price_per_hour: TARIFFS.BASE_RATE,
+        price_per_minute: Math.round(TARIFFS.BASE_RATE / 60),
+        features: [
+          "Влагозащита IP54",
+          "LED подсветка",
+          "Bluetooth подключение",
+          "Регенеративное торможение",
+          "Сменная батарея"
+        ]
+      });
       setLoading(false);
     }, 500);
   }, [id]);
 
+  const getBatteryHealthColor = (health) => {
+    if (health >= 90) return 'success';
+    if (health >= TECHNICAL_PARAMS.CRITICAL_HEALTH) return 'warning';
+    return 'error';
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Доступен':
+      case 'available':
         return 'success';
-      case 'Арендован':
+      case 'rented':
         return 'warning';
-      case 'На обслуживании':
+      case 'maintenance':
         return 'info';
       default:
         return 'error';
     }
   };
 
-  const handleRent = () => {
-    // В будущем здесь будет логика аренды
-    console.log('Начало аренды скейтборда:', id);
+  const formatBatteryPercentage = (current, max) => {
+    return Math.round((current / max) * 100);
   };
 
   if (loading) {
@@ -73,6 +85,11 @@ const SkateDetailPage = () => {
       </div>
     );
   }
+
+  const batteryPercentage = formatBatteryPercentage(
+    skateboard.current_battery_capacity_ah,
+    skateboard.model.battery_capacity_from_factory_ah
+  );
 
   return (
     <div className="skateboard-detail-page">
@@ -104,45 +121,41 @@ const SkateDetailPage = () => {
           <Card className="preview-card">
             <div className="skateboard-preview">
               <div className="preview-image">
-                {/* В будущем здесь будет изображение скейтборда */}
+                <img src={`/images/skateboards/${skateboard.model.name.toLowerCase().replace(/\s+/g, '-')}.jpg`} alt={skateboard.model.name} />
               </div>
-              <div className="battery-status">
-                <div className="battery-icon">
-                  <div 
-                    className="battery-level" 
-                    style={{ width: `${skateboard.battery_level}%` }}
-                  ></div>
+              <div className="battery-info">
+                <div className="battery-status">
+                  <div className="battery-icon">
+                    <div 
+                      className="battery-level" 
+                      style={{ width: `${batteryPercentage}%` }}
+                    ></div>
+                  </div>
+                  <span>{batteryPercentage}%</span>
                 </div>
-                <span>{skateboard.battery_level}%</span>
+                <div className="battery-health">
+                  <Badge variant={getBatteryHealthColor(skateboard.battery_health)}>
+                    Здоровье батареи: {skateboard.battery_health}%
+                  </Badge>
+                </div>
               </div>
             </div>
           </Card>
 
           <Card className="info-card">
-            <h1>{skateboard.name}</h1>
-            <p className="description">{skateboard.description}</p>
-            
-            <div className="rating-price">
-              <div className="rating">
-                <div className="stars">
-                  {'★'.repeat(Math.floor(skateboard.rating))}
-                  {'☆'.repeat(5 - Math.floor(skateboard.rating))}
-                </div>
-                <span>{skateboard.rating} ({skateboard.reviews} отзывов)</span>
-              </div>
-              <div className="price">
-                <span className="amount">{skateboard.pricePerHour} ₽</span>
-                <span className="period">/час</span>
-              </div>
+            <h2>{skateboard.model.name}</h2>
+            <p className="model-description">{skateboard.model.description}</p>
+            <div className="price-info">
+              <div className="main-price">{skateboard.price_per_hour}₽/час</div>
+              <div className="sub-price">({skateboard.price_per_minute}₽/мин)</div>
             </div>
-
-            <Button 
-              variant="primary" 
-              onClick={handleRent}
-              className="rent-button"
-            >
-              Арендовать сейчас
-            </Button>
+            <div className="location-info">
+              <h3>Текущее местоположение</h3>
+              <p>{skateboard.location.address}</p>
+              <p className="location-timestamp">
+                Обновлено: {new Date(skateboard.location.timestamp).toLocaleString()}
+              </p>
+            </div>
           </Card>
         </motion.div>
 
@@ -160,6 +173,12 @@ const SkateDetailPage = () => {
               Характеристики
             </button>
             <button 
+              className={`tab-button ${selectedTab === 'technical' ? 'active' : ''}`}
+              onClick={() => setSelectedTab('technical')}
+            >
+              Технические данные
+            </button>
+            <button 
               className={`tab-button ${selectedTab === 'features' ? 'active' : ''}`}
               onClick={() => setSelectedTab('features')}
             >
@@ -168,34 +187,49 @@ const SkateDetailPage = () => {
           </div>
 
           <Card className="tab-content">
-            {selectedTab === 'specs' ? (
+            {selectedTab === 'specs' && (
               <div className="specs-grid">
                 <div className="spec-item">
                   <span className="spec-label">Макс. скорость</span>
-                  <span className="spec-value">{skateboard.specs.maxSpeed}</span>
+                  <span className="spec-value">{skateboard.model.max_speed} км/ч</span>
                 </div>
                 <div className="spec-item">
                   <span className="spec-label">Запас хода</span>
-                  <span className="spec-value">{skateboard.specs.range}</span>
+                  <span className="spec-value">{skateboard.model.max_range} км</span>
                 </div>
                 <div className="spec-item">
-                  <span className="spec-label">Мощность</span>
-                  <span className="spec-value">{skateboard.specs.motor}</span>
+                  <span className="spec-label">Серийный номер</span>
+                  <span className="spec-value">{skateboard.serial_number}</span>
                 </div>
                 <div className="spec-item">
-                  <span className="spec-label">Вес</span>
-                  <span className="spec-value">{skateboard.specs.weight}</span>
-                </div>
-                <div className="spec-item">
-                  <span className="spec-label">Макс. нагрузка</span>
-                  <span className="spec-value">{skateboard.specs.maxLoad}</span>
-                </div>
-                <div className="spec-item">
-                  <span className="spec-label">Время зарядки</span>
-                  <span className="spec-value">{skateboard.specs.chargingTime}</span>
+                  <span className="spec-label">Общий пробег</span>
+                  <span className="spec-value">{skateboard.total_distance.toFixed(1)} км</span>
                 </div>
               </div>
-            ) : (
+            )}
+            {selectedTab === 'technical' && (
+              <div className="technical-grid">
+                <div className="spec-item">
+                  <span className="spec-label">Емкость батареи (завод.)</span>
+                  <span className="spec-value">{skateboard.model.battery_capacity_from_factory_ah} Ач</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Текущая емкость</span>
+                  <span className="spec-value">{skateboard.current_battery_capacity_ah} Ач</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Текущее напряжение</span>
+                  <span className="spec-value">{skateboard.current_battery_voltage_v} В</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Диапазон напряжений</span>
+                  <span className="spec-value">
+                    {skateboard.model.min_battery_voltage_v}В - {skateboard.model.max_battery_voltage_v}В
+                  </span>
+                </div>
+              </div>
+            )}
+            {selectedTab === 'features' && (
               <ul className="features-list">
                 {skateboard.features.map((feature, index) => (
                   <motion.li 

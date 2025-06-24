@@ -10,19 +10,20 @@ import LogViewer from '../components/admin/LogViewer';
 
 const AdminLayout = () => {
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <AdminNav />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          minHeight: '100vh',
-          backgroundColor: '#f5f5f5'
+          backgroundColor: '#f5f5f5',
+          marginLeft: '240px', // Соответствует ширине AdminNav
+          minHeight: '100vh'
         }}
       >
         <Routes>
-          <Route path="/" element={<Navigate to="skateboards" replace />} />
+          <Route index element={<Navigate to="skateboards" replace />} />
           <Route path="skateboards" element={<SkateboardsPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="zones" element={<ZonesPage />} />

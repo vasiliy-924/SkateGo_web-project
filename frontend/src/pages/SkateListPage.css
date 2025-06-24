@@ -1,21 +1,18 @@
 .skatelist-page {
-  max-width: 1440px;
+  padding: 20px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
 /* Hero Banner */
 .hero-banner {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-  border-radius: 24px;
-  padding: 3rem 2rem;
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 30px;
   color: white;
-  margin-bottom: 2rem;
   position: relative;
   overflow: hidden;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .hero-banner::before {
@@ -25,46 +22,46 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='100%' height='100%' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='rgba(255,255,255,0.1)' fill-rule='evenodd'/%3E%3C/svg%3E");
-  opacity: 0.6;
+  background: url('../assets/skateboard-hero.svg') no-repeat right center;
+  opacity: 0.1;
+  transform: scale(1.2);
 }
 
 .hero-content {
-  flex: 1;
+  position: relative;
   z-index: 1;
 }
 
 .hero-content h1 {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-  line-height: 1.2;
+  font-size: 2.5em;
+  margin: 0 0 10px 0;
 }
 
 .hero-content p {
-  font-size: 1.25rem;
+  font-size: 1.2em;
   opacity: 0.9;
+  margin: 0;
 }
 
 .hero-stats {
   display: flex;
-  gap: 2rem;
-  z-index: 1;
+  gap: 30px;
+  margin-top: 30px;
 }
 
-.hero-stats .stat-item {
-  text-align: center;
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.hero-stats .stat-number {
-  display: block;
-  font-size: 2.5rem;
+.stat-number {
+  font-size: 2em;
   font-weight: bold;
-  line-height: 1;
 }
 
-.hero-stats .stat-label {
-  font-size: 0.875rem;
+.stat-label {
+  font-size: 0.9em;
   opacity: 0.8;
 }
 
@@ -72,25 +69,43 @@
 .bento-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
-  gap: 2rem;
+  grid-template-rows: auto 1fr;
+  gap: 20px;
+  grid-template-areas:
+    "filters map"
+    "filters list";
 }
 
-/* Filters Section */
+.filters-section {
+  grid-area: filters;
+}
+
+.map-section {
+  grid-area: map;
+}
+
+.skateboards-grid {
+  grid-area: list;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
 .filter-card {
-  position: sticky;
-  top: 2rem;
+  padding: 20px;
 }
 
 .filter-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 20px;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 10px;
 }
 
 .filter-group label {
@@ -99,227 +114,273 @@
 }
 
 .filter-select {
-  padding: 0.75rem;
-  border-radius: 12px;
-  border: 2px solid var(--border-color);
-  background: var(--input-bg);
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.filter-select:hover {
-  border-color: var(--primary-color);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--background-color);
+  color: var(--text-color);
 }
 
 .battery-slider {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  padding: 10px 0;
 }
 
-.battery-slider input[type="range"] {
+.battery-range-input {
   width: 100%;
-  height: 6px;
+  height: 8px;
   -webkit-appearance: none;
-  background: var(--primary-color);
-  border-radius: 3px;
+  appearance: none;
+  background: linear-gradient(to right, 
+    var(--error-light) 0%, 
+    var(--warning-light) 50%, 
+    var(--success-light) 100%
+  );
+  border-radius: 4px;
   outline: none;
 }
 
-.battery-slider input[type="range"]::-webkit-slider-thumb {
+.battery-range-input::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border: 2px solid var(--primary-color);
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--primary-color);
+  border: 2px solid var(--background-color);
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
 }
 
-.battery-slider input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
+.battery-range-input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--primary-color);
+  border: 2px solid var(--background-color);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.battery-range-input::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.battery-range-input::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Map Section */
 .map-card {
-  height: fit-content;
-  transition: all 0.3s ease;
+  padding: 20px;
 }
 
 .map-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 }
 
 .map-container {
   height: 300px;
-  border-radius: 12px;
-  overflow: hidden;
   transition: height 0.3s ease;
 }
 
 .map-container.expanded {
-  height: 600px;
+  height: 500px;
 }
 
 /* Skateboards Grid */
-.skateboards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
-  grid-column: 1 / -1;
-}
-
 .skateboard-card {
   cursor: pointer;
-  transition: all 0.3s ease;
-  perspective: 1000px;
-  transform-style: preserve-3d;
+  overflow: hidden;
+  transition: transform 0.2s ease;
 }
 
 .skateboard-card:hover {
-  transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-  box-shadow: 
-    0 10px 20px rgba(0,0,0,0.1),
-    0 6px 6px rgba(0,0,0,0.1),
-    0 0 100px rgba(var(--primary-rgb), 0.1);
+  transform: translateY(-5px);
 }
 
 .skateboard-card__image {
   height: 200px;
-  border-radius: 12px 12px 0 0;
   overflow: hidden;
+  border-radius: 12px 12px 0 0;
+  background: var(--background-secondary);
   position: relative;
 }
 
-.skateboard-preview {
+.skateboard-card__image.no-image::before {
+  content: '🛹';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+}
+
+.skateboard-card__image img {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.skateboard-card:hover .skateboard-card__image img {
+  transform: scale(1.05);
 }
 
 .skateboard-card__content {
-  padding: 1.5rem;
+  padding: 20px;
 }
 
 .skateboard-card__content h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
-  color: var(--text-primary);
+  margin: 0 0 10px 0;
+  font-size: 1.2em;
+  color: var(--text-color);
 }
 
 /* Status Badges */
 .status-badge {
   display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.9em;
+  margin-bottom: 10px;
 }
 
 .status-badge--success {
-  background-color: rgba(46, 204, 113, 0.1);
-  color: #27ae60;
+  background: var(--success-light);
+  color: var(--success-dark);
 }
 
 .status-badge--warning {
-  background-color: rgba(241, 196, 15, 0.1);
-  color: #f39c12;
+  background: var(--warning-light);
+  color: var(--warning-dark);
 }
 
 .status-badge--info {
-  background-color: rgba(52, 152, 219, 0.1);
-  color: #2980b9;
+  background: var(--info-light);
+  color: var(--info-dark);
 }
 
 .status-badge--error {
-  background-color: rgba(231, 76, 60, 0.1);
-  color: #c0392b;
+  background: var(--error-light);
+  color: var(--error-dark);
 }
 
 /* Battery Indicator */
 .battery-indicator {
+  background: var(--background-secondary);
   height: 8px;
-  background-color: var(--bg-secondary);
   border-radius: 4px;
-  overflow: hidden;
+  margin: 15px 0;
   position: relative;
 }
 
 .battery-indicator__level {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
   border-radius: 4px;
-  transition: width 0.6s ease;
+  background: linear-gradient(90deg, var(--success-color) 0%, var(--primary-color) 100%);
+  transition: width 0.3s ease;
 }
 
 .battery-indicator span {
   position: absolute;
   right: 0;
-  top: -24px;
-  font-size: 0.875rem;
+  top: -20px;
+  font-size: 0.9em;
   color: var(--text-secondary);
+}
+
+.skateboard-card__specs {
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+}
+
+.spec-label {
+  color: var(--text-secondary);
+}
+
+.spec-value {
   font-weight: 500;
 }
 
+.skateboard-card__price {
+  margin-top: 15px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.price-minute {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  font-weight: normal;
+}
+
+.skateboard-card-skeleton {
+  padding: 20px;
+}
+
 /* Responsive Design */
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
   .bento-grid {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "filters"
+      "map"
+      "list";
   }
 
-  .filter-card {
-    position: static;
-  }
-
-  .filter-content {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .filter-group {
-    flex: 1;
-    min-width: 200px;
+  .filters-section {
+    position: sticky;
+    top: 20px;
+    z-index: 10;
   }
 }
 
 @media (max-width: 768px) {
-  .skatelist-page {
-    padding: 1rem;
-  }
-
   .hero-banner {
-    flex-direction: column;
-    text-align: center;
-    padding: 2rem 1rem;
+    padding: 30px;
   }
 
   .hero-content h1 {
-    font-size: 2rem;
+    font-size: 2em;
   }
 
-  .hero-stats {
-    margin-top: 2rem;
+  .skateboards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .skatelist-page {
+    padding: 10px;
   }
 
-  .filter-content {
-    flex-direction: column;
+  .hero-banner {
+    padding: 20px;
   }
 
-  .map-container {
-    height: 250px;
+  .hero-content h1 {
+    font-size: 1.8em;
   }
 
-  .map-container.expanded {
-    height: 400px;
+  .stat-number {
+    font-size: 1.5em;
   }
 } 

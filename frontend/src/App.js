@@ -149,21 +149,12 @@ function App() {
                 <Route path="/profile" element={<PageContainer><ProfilePage /></PageContainer>} />
                 <Route path="/auth" element={<PageContainer><AuthPage /></PageContainer>} />
 
-                {/* Admin routes with Suspense */}
+                {/* Admin routes */}
                 <Route
                   path="/admin/*"
                   element={
                     <Suspense fallback={<LoadingFallback />}>
-                      <PageContainer>
-                        <Routes>
-                          <Route element={<AdminLayout />}>
-                            <Route path="reports" element={<ReportsPage />} />
-                            <Route path="skateboards" element={<SkateboardsPage />} />
-                            <Route path="users" element={<UsersPage />} />
-                            <Route path="zones" element={<ZonesPage />} />
-                          </Route>
-                        </Routes>
-                      </PageContainer>
+                      <AdminLayout />
                     </Suspense>
                   }
                 />

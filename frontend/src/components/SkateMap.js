@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { SKATEBOARD_STATUSES } from '../mocks/types';
 import './SkateMap.css';
 
 const SkateMap = ({ skateboards = [], onSkateSelect }) => {
@@ -15,16 +16,18 @@ const SkateMap = ({ skateboards = [], onSkateSelect }) => {
   }, []);
 
   const getStatusIcon = (status) => {
-    const colors = { 
-      'Доступен': 'green', 
-      'Арендован': 'blue',
-      'На обслуживании': 'orange',
-      'Сломан': 'red'
+    const colors = {
+      [SKATEBOARD_STATUSES.AVAILABLE]: 'green',
+      [SKATEBOARD_STATUSES.RENTED]: 'blue',
+      [SKATEBOARD_STATUSES.MAINTENANCE]: 'orange',
+      [SKATEBOARD_STATUSES.CHARGING]: 'orange',
+      [SKATEBOARD_STATUSES.BROKEN]: 'red',
+      [SKATEBOARD_STATUSES.OFFLINE]: 'gray'
     };
     
     return L.divIcon({
       className: `map-marker`,
-      html: `<div class="marker-pin ${colors[status] || 'green'}"></div>`,
+      html: `<div class="marker-pin ${colors[status] || 'gray'}"></div>`,
       iconSize: [30, 30],
       iconAnchor: [15, 30],
       popupAnchor: [0, -30]
@@ -43,6 +46,11 @@ const SkateMap = ({ skateboards = [], onSkateSelect }) => {
       (Math.max(...lats) + Math.min(...lats)) / 2,
       (Math.max(...lngs) + Math.min(...lngs)) / 2
     ];
+  };
+
+  const getStatusClass = (status) => {
+    if (!status) return 'status--offline';
+    return `status--${status.toLowerCase()}`;
   };
 
   return (
@@ -66,9 +74,13 @@ const SkateMap = ({ skateboards = [], onSkateSelect }) => {
         >
           <Popup>
             <div className="skateboard-popup">
-              <h3>{skate.name}</h3>
-              <p>Статус: <span className={`status status--${skate.status.toLowerCase()}`}>{skate.status}</span></p>
-              <p>Заряд батареи: {skate.battery_level}%</p>
+              <h3>{skate.model.name}</h3>
+              <p>
+                Статус: <span className={getStatusClass(skate.status)}>
+                  {skate.status || 'Недоступен'}
+                </span>
+              </p>
+              <p>Заряд батареи: {skate.battery_health || 0}%</p>
               <button 
                 className="popup-button"
                 onClick={(e) => {

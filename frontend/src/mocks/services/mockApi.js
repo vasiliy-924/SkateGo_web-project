@@ -47,6 +47,16 @@ class MockApi {
     return this.mockRequest(this.skateboards[index]);
   }
 
+  // Методы для работы с арендой
+  async getCurrentRentals() {
+    // Фильтруем только текущие аренды (те, у которых нет end_time)
+    const currentRentals = this.rentals.filter(rental => !rental.end_time);
+    return this.mockRequest({
+      data: currentRentals,
+      count: currentRentals.length
+    });
+  }
+
   // Методы для работы с историей аренды
   async getRentalHistory(page = 1) {
     const start = (page - 1) * PAGE_SIZE;
