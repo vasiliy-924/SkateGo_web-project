@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig',
+    'rental.apps.RentalConfig',
 ] + ([
     'django_extensions',
     'debug_toolbar',

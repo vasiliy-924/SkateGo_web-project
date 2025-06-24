@@ -26,8 +26,8 @@ class SkateboardModel(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(120.0)],
         verbose_name='Нижний предел напряжения батареи (V)'
     )
-    power_reverse_km = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(200)],
+    power_reserse_km = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1.0), MaxValueValidator(200.0)],
         verbose_name='Запас хода (km)'
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -76,16 +76,26 @@ class Skateboard(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(120.0)],
         verbose_name='Текущее напряжение в батарее (V)'
     )
-    total_distance_km = models.FloatField(
+    odometer_km = models.FloatField(
         default=0.0,
         validators=[MinValueValidator(0.0)],
         verbose_name='Общий пробег текущего электроскейтбора (km)'
+    )
+    total_rides_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Количество поездок (раз)'
     )
     status = models.CharField(
         max_length=30,
         choices=STATUS_CHOICES,
         default='available',
         verbose_name='Статус'
+    )
+    price_per_hour_rub = models.DecimalField(
+        max_digits=7,
+        decimal_places=2,
+        validators=[MinValueValidator(0.00), MaxValueValidator(15000.00)],
+        verbose_name='Стоимость поездки (rubles in hour)'
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -94,9 +104,9 @@ class Skateboard(models.Model):
         return f'{self.model.name} - {self.serial_number}'
     
     def save(self, *args, **kwargs):
-        if not self.current_battery_capacity_ah:
+        if self.current_battery_capacity_ah is None:
             self.current_battery_capacity_ah = self.model.battery_capacity_from_factory_ah
-        if not self.current_battery_voltage_v:
+        if self.current_battery_voltage_v is None:
             self.current_battery_voltage_v = (self.model.max_battery_voltage_v + self.model.min_battery_voltage_v) / 2
         super().save(*args, **kwargs)
 
@@ -117,7 +127,7 @@ class Skateboard(models.Model):
         current_voltage_prcnt = (self.current_battery_voltage_v - self.model.min_battery_voltage_v)/(self.model.max_battery_voltage_v - self.model.min_battery_voltage_v) * 100
 
         if self.current_battery_voltage_v > self.model.min_battery_voltage_v:
-            return initial_km * self.battery_capacity_max_now_prcnt * current_voltage_prcnt 
+            return initial_km * self.battery_capacity_max_now_prcnt * current_voltage_prcnt / 10**4
         return 0.0
         
 
@@ -148,7 +158,6 @@ class SkateboardLocation(models.Model):
         )
 
     class Meta:
-        abstract = True
         verbose_name = 'Местоположение электроскейтборда'
         verbose_name_plural = 'Местоположение электроскейтбордов'
         ordering = ('-location_last_update',)
