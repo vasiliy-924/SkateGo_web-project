@@ -7,6 +7,10 @@ ENV PYTHONUNBUFFERED=1
 
 RUN pip install --upgrade pip
 WORKDIR /app/www/skatego
+
+RUN mkdir -p /app/www/skatego/static /app/www/skatego/media && \
+    chown -R user_skatego:groupdjango /app/www/skatego
+
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 

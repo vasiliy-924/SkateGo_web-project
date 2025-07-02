@@ -2,14 +2,20 @@ import os
 from os import environ
 from pathlib import Path
 
+from datetime import timedelta
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = environ.get('DJANGO_SECRET_KEY')
+# SECRET_KEY = environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = 'django-insecure-)iv7)t=p-ph%e=lwa-&8bw2(5)n=baj(hw**&q4t!%ssdfy-o#'
+
 
 DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+# ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
 
 
 INSTALLED_APPS = [
@@ -20,6 +26,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+    'drf_yasg',
     # приложения
     'core.apps.CoreConfig',
     'users.apps.UsersConfig',
@@ -110,7 +119,27 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = '/app/www/skatego/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
+MEDIA_URL = 'media/'
+MEDIA_ROOT = '/app/www/skatego/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}

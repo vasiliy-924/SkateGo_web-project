@@ -126,7 +126,6 @@ interface Review {
 - GET /api/skateboard-models/{id} - детальная информация о модели
 - POST /api/skateboard-models (admin) - создание новой модели
 - PUT /api/skateboard-models/{id} (admin) - обновление модели
-- PATCH /api/skateboard-models/{id}/status (admin) - изменение статуса активности
 
 ### Аренда
 - POST /api/rentals/start - начало аренды

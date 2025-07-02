@@ -30,6 +30,12 @@ class SkateboardModel(models.Model):
         validators=[MinValueValidator(1.0), MaxValueValidator(200.0)],
         verbose_name='Запас хода (km)'
     )
+    image = models.ImageField(
+        upload_to='skates_images/',
+        null=True,
+        blank=True,
+        verbose_name='Изображение'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
