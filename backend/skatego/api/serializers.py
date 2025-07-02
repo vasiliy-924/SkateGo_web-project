@@ -12,7 +12,7 @@ class SkateboardModelSerializer(serializers.ModelSerializer):
     """Сериализатор для модели SkateboardModel."""
     class Meta:
         model = SkateboardModel
-        fields = ('id', 'name', ' description', 'max_speed_km_h', 
+        fields = ('id', 'name', 'description', 'max_speed_km_h', 
                   'battery_capacity_from_factory_ah', 'max_battery_voltage_v',
                   'min_battery_voltage_v', 'power_reserse_km', 'created_at',
                   'image', 'updated_at'

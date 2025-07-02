@@ -10,9 +10,7 @@ services:
     ports:
       - '80:8088'
     volumes:
-      - ./skatego/static:/app/www/skatego/static
-      - ./skatego/media:/app/www/skatego/media
-      - ./skatego/logs:/app/www/skatego/logs
+      - ./skatego:/app/www/skatego
       - ./nginx:/etc/nginx/conf.d
     depends_on:
       - skato_go
