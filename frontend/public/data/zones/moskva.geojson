@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "id": "zone-1", "type": "ride", "name": "Центральная зона" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [37.55, 55.75],
+            [37.62, 55.75],
+            [37.62, 55.78],
+            [37.55, 55.78],
+            [37.55, 55.75]
+          ]
+        ]
+      }
+    }
+  ]
+}
+
+

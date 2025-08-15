@@ -20,10 +20,18 @@ docker compose exec skate_go python manage.py loaddata db.json
 docker compose exec postgres psql -U skate_user -d skate_db -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 ```
 
+```bash
+docker compose exec skate_go python manage.py createsuperuser
+```
+
 **Остановить, собрать и запустить контейнеры 🔄**
 ```bash
 docker-compose down && docker-compose build && docker-compose up -d
 ```
+
+
+
+
 
 **Проверить статус миграций 📋**
 ```bash

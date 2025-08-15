@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'djoser',
     'drf_yasg',
     # приложения
@@ -80,16 +81,24 @@ WSGI_APPLICATION = 'skatego.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USERNAME'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('POSTGRES_HOST'),
-        'PORT': os.environ.get('POSTGRES_PORT'),
+if os.environ.get('POSTGRES_HOST'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DATABASE_NAME'),
+            'USER': os.environ.get('DATABASE_USERNAME'),
+            'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+            'HOST': os.environ.get('POSTGRES_HOST'),
+            'PORT': os.environ.get('POSTGRES_PORT'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_USER_MODEL = 'users.user'
 
@@ -119,11 +128,11 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
-STATIC_ROOT = '/app/www/skatego/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+# Allow overriding static/media root via env for containerized setups
+STATIC_ROOT = os.environ.get('STATIC_ROOT', '/app/www/skatego/static/')
 
 MEDIA_URL = 'media/'
-MEDIA_ROOT = '/app/www/skatego/media/'
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', '/app/www/skatego/media/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

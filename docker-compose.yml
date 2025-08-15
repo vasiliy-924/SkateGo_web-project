@@ -1,0 +1,58 @@
+volumes:
+  pg_data:
+  frontend_static:
+  backend_static:
+  media:
+  
+services:
+  db:
+    image: postgres:16-alpine
+    env_file: .env
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  skate_go_backend:
+    build: ./backend/
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "sleep 6 && python skatego/manage.py makemigrations users --noinput || true && python skatego/manage.py migrate --noinput && python skatego/manage.py collectstatic --noinput && cd skatego && gunicorn -c gunicorn.py skatego.wsgi:application"
+    volumes:
+      - backend_static:/backend_static
+      - media:/media
+    environment:
+      - STATIC_ROOT=/backend_static
+      - MEDIA_ROOT=/media
+    restart: unless-stopped
+
+  skate_go_frontend:
+    build: ./frontend/
+    env_file: .env
+    command: sh -c "cp -r /app/build/. /frontend_static/"
+    volumes:
+      - frontend_static:/frontend_static
+
+  gateway:
+    build: ./gateway/
+    environment:
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
+    volumes:
+      - frontend_static:/usr/share/nginx/html:ro
+      - backend_static:/static:ro
+      - media:/media:ro
+    ports:
+      - "8000:80"
+    restart: unless-stopped
+

@@ -1,0 +1,6 @@
+[
+  { "id": "basic", "title": "Базовый", "start_price": 20, "per_minute": 7, "additional": "Без абонплаты" },
+  { "id": "day", "title": "Дневной", "start_price": 0, "per_minute": 6, "additional": "Минимум 10 минут" }
+]
+
+

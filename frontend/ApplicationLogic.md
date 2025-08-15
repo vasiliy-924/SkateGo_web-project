@@ -210,7 +210,7 @@ interface Review {
 
 ## Рекомендуемый стек технологий
 
-- **Язык**: Python 3.11+
+- **Язык**: Python 3.12+
 - **Framework**: Django 4.2+ с Django REST framework
 - **База данных**: PostgreSQL 14+
 - **Кэширование**: Redis
